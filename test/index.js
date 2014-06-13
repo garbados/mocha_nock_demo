@@ -27,16 +27,19 @@ describe('addInSet', function () {
     .fail(done);
   });
 
-  describe('should insert', function () {
+  it('should insert 10 numbers in order', function (done) {
+    var self = this;
     this.timeout(0);
 
-    before(function () {
-      var self = this;
-      this.addInSetSeries = function (maximum, done) {
-        async.timesSeries(maximum, addInSet.bind(null, self.collection, self.key), done);
-      };
-
-      this.assertOrder = function (done) {
+    async.series([
+      function (done) {
+        // insert our data in order
+        async.timesSeries(10, function (n, done) {
+          addInSet(self.collection, self.key, n, done);
+        }, done);
+      },
+      function (done) {
+        // ensure our data is in order
         db.get(self.collection, self.key)
         .then(function (res) {
           var doc = res.body;
@@ -50,31 +53,8 @@ describe('addInSet', function () {
           done();
         })
         .fail(done);
-      };
-
-      this.addInSetTest = function (maximum, done) {
-        async.series([
-            self.addInSetSeries.bind(self, maximum),
-            self.assertOrder
-        ], done);
-      };
-    });
-
-    it.only('10 numbers in order', function (done) {
-      this.addInSetTest(10, done);
-    });
-
-    it('20 numbers in order', function (done) {
-      this.addInSetTest(20, done);
-    });
-
-    it('30 numbers in order', function (done) {
-      this.addInSetTest(30, done);
-    });
-
-    it('40 numbers in order', function (done) {
-      this.addInSetTest(40, done);
-    });
+      }
+    ], done);
   });
 
   after(recorder.after);
