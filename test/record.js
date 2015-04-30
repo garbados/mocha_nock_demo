@@ -32,7 +32,7 @@ module.exports = function (name, options) {
     // saves our recording if fixtures didn't already exist
     after: function (done) {
       if (!has_fixtures) {
-        has_fixtures = nock.recorder.play();
+        var fixtures = nock.recorder.play();
         var text = "var nock = require('nock');\n" + fixtures.join('\n');
         fs.writeFile(fp, text, done);
       } else {
